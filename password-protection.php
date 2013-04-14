@@ -6,10 +6,14 @@
  * Author: Chris Olbekson <chris@x-team.com>
  * Version: 1.0
  * Author URI: http://x-team.com
+ * Contributor: Weston Rutor <weston@x-team.com>
  */
 
 /*
- Copyright 2013 Chris Olbekson (email: chris@x-team.com
+ Copyright 2013 Chris Olbekson (email: chris@x-team.com) 
+ HTTP Authentication methods adpated from WPized Password Protection
+ by: Weston Rutor X-Team BOOM!
+ 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2 of the License, or
