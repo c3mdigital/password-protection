@@ -1,14 +1,14 @@
-password-protection
-===================
-=== Password Protection ===
-Contributors: c3mdigital
-Donate link: http://www.redcross.org/charitable-donations
-Tags: security, password protection, brute force blocking
-Requires at least: 3.5.1
-Tested up to: 3.6 beta
-Stable tag: 1.0
-License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+
+=== Password Protection ===  
+
+Contributors: c3mdigital  
+Donate link: http://www.redcross.org/charitable-donations  
+Tags: security, password protection, brute force blocking  
+Requires at least: 3.5.1  
+Tested up to: 3.6 beta  
+Stable tag: 1.0  
+License: GPLv2 or later  
+License URI: http://www.gnu.org/licenses/gpl-2.0.html  
 
 Adds HTTP Basic Authentication as a secondary defense layer for wp-admin and to prevent brute force attack attempts.  Also includes an option to block access to wp-admin from users (bots) with No-Referrer Headers.
 
