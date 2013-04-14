@@ -26,6 +26,24 @@ PLEASE NOTE: Very Limited support will be offered for this plugin but it will be
 1. Activate the plugin through the 'Plugins' menu in WordPress
 1. Visit the settings page and enter a username and password to be used as the secondary authorization
 
+== Frequently Asked Questions ==
+
+= Will this plugin keep my site from being hacked? =
+
+NO! No plugin can keep your site from being hacked but this plugin will stop annoying brute force attempts to your login page.
+
+= What is a No-Referrer Request? =
+
+A No-Referrer Request is a direct request made to your wp-login.php file.  Normally when you go to wp-admin and you are not logged in WordPress will redirect you to wp-login.php.  When this happens the referrer is from your same domain.  Bots and automated scripts normally make direct post requests to wp-login.php without a referrer.  This plugin can block all requests without a referrer or requests from a referrer that is not from your domain.
+
+= What if I forget my Password? =
+
+If you forget your password there is no way to recover it because it is stored as an encrypted hash.  If you forget your password you will have to disable the plugin by changing the name of the password-protection using FTP.  Once disabled and you log in you can then re activate the plugin and enter a new password on the settings page.
+
+== Screenshots ==
+
+1. HTTP Authentication on Chrome, your browser my not look the same but it should be similar.
+2. The admin interface.
 
 == Changelog ==
 
