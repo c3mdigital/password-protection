@@ -18,7 +18,7 @@ will be required to successfully enter the additional authorization details befo
 without a valid referrer header from your site. Please Note: No security plugin will provide 100% protection from hackers.  This plugin simply makes it harder for them to gain access using
 automated techniques.  Please remember to ALWAYS KEEP UP TO DATE BACKUPS and use STRONG PASSWORDS!!
 
-PLEASE NOTE: Very Limited support will be offered for this plugin but it will be kept up to date and any bugs can be reported on the github page.
+PLEASE NOTE: Very Limited support will be offered for this plugin but it will be kept up to date and any bugs can be reported on the github page at https://github.com/c3mdigital/password-protection.
 
 == Installation ==
 
