@@ -1,16 +1,14 @@
+=== Password Protection ===
+Contributors: c3mdigital
+Donate link: http://www.redcross.org/charitable-donations
+Tags: security, password protection, brute force blocking
+Requires at least: 3.5.1
+Tested up to: 3.6 beta
+Stable tag: 1.0.1
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-=== Password Protection ===  
-
-Contributors: c3mdigital  
-Donate link: http://www.redcross.org/charitable-donations  
-Tags: security, password protection, brute force blocking  
-Requires at least: 3.5.1  
-Tested up to: 3.6 beta  
-Stable tag: 1.0  
-License: GPLv2 or later  
-License URI: http://www.gnu.org/licenses/gpl-2.0.html  
-
-Adds HTTP Basic Authentication as a secondary defense layer for wp-admin and to prevent brute force attack attempts.  Also includes an option to block access to wp-admin from users (bots) with No-Referrer Headers.
+HTTP Basic Authentication as secondary defense for wp-admin - blocks brute force attacks.  Also blocks users (bots) with No-Referrer Headers.
 
 == Description ==
 
@@ -20,7 +18,7 @@ will be required to successfully enter the additional authorization details befo
 without a valid referrer header from your site. Please Note: No security plugin will provide 100% protection from hackers.  This plugin simply makes it harder for them to gain access using
 automated techniques.  Please remember to ALWAYS KEEP UP TO DATE BACKUPS and use STRONG PASSWORDS!!
 
-PLEASE NOTE: Very Limited support will be offered for this plugin but it will be kept up to date and any bugs can be reported on the github page.
+PLEASE NOTE: Very Limited support will be offered for this plugin but it will be kept up to date and any bugs can be reported on the github page at https://github.com/c3mdigital/password-protection.
 
 == Installation ==
 
@@ -28,13 +26,41 @@ PLEASE NOTE: Very Limited support will be offered for this plugin but it will be
 1. Activate the plugin through the 'Plugins' menu in WordPress
 1. Visit the settings page and enter a username and password to be used as the secondary authorization
 
+== Frequently Asked Questions ==
+
+= Will this plugin keep my site from being hacked? =
+
+NO! No plugin can keep your site from being hacked but this plugin will stop annoying brute force attempts to your login page.
+
+= What is a No-Referrer Request? =
+
+A No-Referrer Request is a direct request made to your wp-login.php file.  Normally when you go to wp-admin and you are not logged in WordPress will redirect you to wp-login.php.  When this happens the referrer is from your same domain.  Bots and automated scripts normally make direct post requests to wp-login.php without a referrer.  This plugin can block all requests without a referrer or requests from a referrer that is not from your domain.
+
+= What if I forget my Password? =
+
+If you forget your password there is no way to recover it because it is stored as an encrypted hash.  If you forget your password you will have to disable the plugin by changing the name of the password-protection using FTP.  Once disabled and you log in you can then re activate the plugin and enter a new password on the settings page.
+
+== Screenshots ==
+
+1. HTTP Authentication on Chrome, your browser my not look the same but it should be similar.
+2. The admin interface.
 
 == Changelog ==
 
 = 1.0 =
 * Initial Version
 
+= 1.0.1 =
+* Changed password hashing to use wp_hash_password and wp_check_password *props chrisguitarguy <https://github.com/chrisguitarguy>
+* Fixed bug that bypassed block when WordPress was installed in sub directory or query string was appended to url *props chrisguitarguy
+* Block No-Referrer requests option checked by default
+* Added version check and update function to clear current password for upgrading users to force change and use of new password hashing
+
 == Upgrade Notice ==
+
+= 1.0.1 =
+* This update strengthens the password hashing to use the built WordPress password hashing and checking. It also fixes bugs that allowed bypassing auth checks when WordPress installed in subdirectory.
+* This update will clear your current password to prevent getting locked out due to new password hashing used.  Please update your password after updating.
 
 = 1.0 =
 * You just installed it and don't need to upgrade

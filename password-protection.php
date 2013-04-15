@@ -4,7 +4,7 @@
  * Plugin URI: http://x-team.com
  * Description: Adds HTTP Basic Authentication as a secondary defense layer for wp-admin and to prevent brute force attack attempts
  * Author: Chris Olbekson <chris@x-team.com>
- * Version: 1.0
+ * Version: 1.0.1
  * Author URI: http://x-team.com
  * Contributor: Weston Rutor <weston@x-team.com>
  */
@@ -75,16 +75,31 @@ class WPized_Password_Protect {
 	 */
 	public static $password_page_hook;
 
+	static $plugin_version = '1.0.1';
+
 	/**
 	 * Class constructor
 	 *  Add our actions hooks here
 	 */
 	function __construct() {
+		self::run_update();
 		add_action( 'admin_menu', array( __CLASS__, 'admin_settings_page' ) );
 		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
 		add_action( 'parse_request', array( __CLASS__, 'http_authenticate' ) );
 		add_action( 'init', array( __CLASS__, 'http_authenticate' ), 100 );
+	}
 
+	/**
+	 * Plugin update to delete current saved password hash to comply with new
+	 *  password hashing added in 1.0.1
+	 */
+	static function run_update() {
+		$settings = get_option( self::$settings_key );
+		if ( ! empty( $settings ) && ! isset( $settings['plugin_version'] ) ) {
+			$settings['plugin_version'] = self::$plugin_version;
+			$settings['password'] = false;
+			update_option( self::$settings_key, $settings );
+		}
 	}
 
 	/**
@@ -93,7 +108,7 @@ class WPized_Password_Protect {
 	 * @hook add_action, hook name: admin_menu
 	 */
 	static function admin_settings_page() {
-			self::$password_page_hook = add_options_page(
+		self::$password_page_hook = add_options_page(
 			self::$password_page_name,
 			self::$password_page_name,
 			self::$meta_cap,
@@ -127,6 +142,8 @@ class WPized_Password_Protect {
 	 */
 	static function settings_html() {
 		$settings = get_option( self::$settings_key );
+		if ( ! isset( $settings['referrer_block'] ) )
+			$settings['referrer_block'] = 'off';
 		?>
 	    <p>
 	        <label for="pp-username">Username</label>
@@ -138,8 +155,8 @@ class WPized_Password_Protect {
 			<span class="description"> If you would like to change the password type a new one. Otherwise leave this blank.</span>
 		</p>
 		<p>
-			<label for="pp-block-no-referrer">Block No-Referrer Requests</label>
-			<input type="checkbox" id="pp-block-no-referrer" name="<?php echo esc_attr( self::$settings_key.'[block-no-referrer]' ) ?>" value="0" <?php checked( '0', $settings['block-no-referrer'] ); ?> />
+			<label for="pp-referrer_block">Block No-Referrer Requests</label>
+			<input name="<?php echo esc_attr( self::$settings_key.'[referrer_block]' ) ?>" type="checkbox" id="pp-referrer_block" value="on" <?php checked( 'on', $settings['referrer_block'] ); ?> />
 			<span class="description">When this is checked direct requests to your login page will be blocked.  This will prevent most bot net brute force attacks from ever hitting your login page </span>
 		</p>
 		<?php
@@ -226,7 +243,9 @@ class WPized_Password_Protect {
 		header( 'Cache-Control: no-cache, must-revalidate, max-age=0' );
 
 		// Skip checks if we're logged into WordPress already or not in admin
-		if ( ! is_admin() && '/wp-login.php' !== $_SERVER['REQUEST_URI'] )
+		$login_path = parse_url( wp_login_url(), PHP_URL_PATH );
+		$request_path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+		if ( ! is_admin() && $login_path != $request_path )
 			return;
 
 		// Only run this if we have a user and pass provided
@@ -234,7 +253,7 @@ class WPized_Password_Protect {
 		if ( empty( $settings ) || empty( $settings['username'] )  || empty( $settings['password'] ) )
 			return;
 
-		if ( isset( $settings['block-no-referrer'] ) && '0' != $settings['block-no-referrer'] ) {
+		if ( isset( $settings['referrer_block'] ) && 'off' != $settings['referrer_block'] ) {
 			if ( $_SERVER['REMOTE_ADDR'] != $_SERVER['SERVER_ADDR'] )
 				self::not_authorized();
 		}

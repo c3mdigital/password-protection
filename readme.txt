@@ -4,11 +4,11 @@ Donate link: http://www.redcross.org/charitable-donations
 Tags: security, password protection, brute force blocking
 Requires at least: 3.5.1
 Tested up to: 3.6 beta
-Stable tag: 1.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Adds HTTP Basic Authentication as a secondary defense layer for wp-admin and to prevent brute force attack attempts.  Also includes an option to block access to wp-admin from users (bots) with No-Referrer Headers.
+HTTP Basic Authentication as secondary defense for wp-admin - blocks brute force attacks.  Also blocks users (bots) with No-Referrer Headers.
 
 == Description ==
 
@@ -50,7 +50,17 @@ If you forget your password there is no way to recover it because it is stored a
 = 1.0 =
 * Initial Version
 
+= 1.0.1 =
+* Changed password hashing to use wp_hash_password and wp_check_password *props chrisguitarguy <https://github.com/chrisguitarguy>
+* Fixed bug that bypassed block when WordPress was installed in sub directory or query string was appended to url *props chrisguitarguy
+* Block No-Referrer requests option checked by default
+* Added version check and update function to clear current password for upgrading users to force change and use of new password hashing
+
 == Upgrade Notice ==
+
+= 1.0.1 =
+* This update strengthens the password hashing to use the built WordPress password hashing and checking. It also fixes bugs that allowed bypassing auth checks when WordPress installed in subdirectory.
+* This update will clear your current password to prevent getting locked out due to new password hashing used.  Please update your password after updating.
 
 = 1.0 =
 * You just installed it and don't need to upgrade
