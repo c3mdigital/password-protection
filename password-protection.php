@@ -157,7 +157,7 @@ class WPized_Password_Protect {
 	static function validate_settings( $settings ) {
 		$saved_settings = get_option( self::$settings_key );
 		if ( ! empty( $settings['password'] ) )
-			$settings['password'] = hash( 'sha256', $settings['password'] );
+			$settings['password'] = wp_hash_password( $settings['password'] );
 		else
 			$settings['password'] = $saved_settings['password'];
 
@@ -230,11 +230,11 @@ class WPized_Password_Protect {
 			return;
 
 		// Only run this if we have a user and pass provided
-		$settings = get_option( self::$settings_key );
-		if ( empty( $settings ) )
+		$settings = get_option( self::$settings_key, array() );
+		if ( empty( $settings ) || empty( $settings['username'] )  || empty( $settings['password'] ) )
 			return;
 
-		if ( '0' != $settings['block-no-referrer'] ) {
+		if ( isset( $settings['block-no-referrer'] ) && '0' != $settings['block-no-referrer'] ) {
 			if ( $_SERVER['REMOTE_ADDR'] != $_SERVER['SERVER_ADDR'] )
 				self::not_authorized();
 		}
@@ -255,12 +255,11 @@ class WPized_Password_Protect {
 		if ( $_SERVER['REQUEST_METHOD'] == 'POST' && $_SERVER['REQUEST_URI'] == '/wp-admin/async-upload.php' )
 			return;
 
-		$pass = $_SERVER['PHP_AUTH_PW'];
 		$is_not_authenticated = (
 			empty( $_SERVER['PHP_AUTH_USER'] ) ||
 			empty( $_SERVER['PHP_AUTH_PW'] ) ||
 			$_SERVER['PHP_AUTH_USER'] != $settings['username'] ||
-			hash( 'sha256', $pass ) != $settings['password']
+			!wp_check_password( $_SERVER['PHP_AUTH_PW'], $settings['password'] )
 		);
 
 		if ( $is_not_authenticated )
