@@ -4,16 +4,16 @@
  * Plugin URI: http://x-team.com
  * Description: Adds HTTP Basic Authentication as a secondary defense layer for wp-admin and to prevent brute force attack attempts
  * Author: Chris Olbekson <chris@x-team.com>
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author URI: http://x-team.com
  * Contributor: Weston Rutor <weston@x-team.com>
  */
 
 /*
- Copyright 2013 Chris Olbekson (email: chris@x-team.com) 
+ Copyright 2013 Chris Olbekson (email: chris@x-team.com)
  HTTP Authentication methods adpated from WPized Password Protection
  by: Weston Rutor X-Team BOOM!
- 
+
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2 of the License, or
@@ -75,7 +75,7 @@ class WPized_Password_Protect {
 	 */
 	public static $password_page_hook;
 
-	static $plugin_version = '1.0.1';
+	static $plugin_version = '1.0.2';
 
 	/**
 	 * Class constructor
@@ -85,8 +85,8 @@ class WPized_Password_Protect {
 		self::run_update();
 		add_action( 'admin_menu', array( __CLASS__, 'admin_settings_page' ) );
 		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
-		add_action( 'parse_request', array( __CLASS__, 'http_authenticate' ) );
 		add_action( 'init', array( __CLASS__, 'http_authenticate' ), 100 );
+		add_action( 'admin_print_footer_scripts', array( __CLASS__, 'settings_page_js' ) );
 	}
 
 	/**
@@ -95,7 +95,7 @@ class WPized_Password_Protect {
 	 */
 	static function run_update() {
 		$settings = get_option( self::$settings_key );
-		if ( ! empty( $settings ) && ! isset( $settings['plugin_version'] ) ) {
+		if ( ! empty( $settings ) && version_compare( isset( $settings['plugin_version'] ) ? $settings['plugin_version'] : '0', self::$plugin_version, '<'  ) ) {
 			$settings['plugin_version'] = self::$plugin_version;
 			$settings['password'] = false;
 			update_option( self::$settings_key, $settings );
@@ -150,14 +150,27 @@ class WPized_Password_Protect {
 			<input type="text" name="<?php echo esc_attr( self::$settings_key.'[username]' ) ?>" id="pp-username" value="<?php echo esc_attr( $settings['username'] ) ?>" />
 		</p>
 		<p>
-	        <label for="pp-password">Password</label>
-			<input type="password" name="<?php echo esc_attr( self::$settings_key.'[password]' ) ?>" id="pp-password" value="" autocomplete="off" />
-			<span class="description"> If you would like to change the password type a new one. Otherwise leave this blank.</span>
+	        <label for="pass1">Password</label>
+			<!--<input type="password" name="<?php echo esc_attr( self::$settings_key.'[password]' ) ?>" id="pp-password" value="" autocomplete="off" />
+			<span class="description"> If you would like to change the password type a new one. Otherwise leave this blank.</span> -->
+			<input type="password" name="pass1" id="pass1" value="" autocomplete="off"/> <span class="description"><?php _e( "If you would like to change the password type a new one. Otherwise leave this blank." ); ?></span><br/>
 		</p>
 		<p>
+			<label for="pass2"> Retype &nbsp; &nbsp; </label>
+			<input type="password" name="pass2" id="pass2" value="" autocomplete="off"/> <span class="description"><?php _e( "Type your new password again." ); ?></span><br/>
+		</p>
+			<div class="mismatch" style="height:16px;">
+				<span class="hidden match" style="color:red">Passwords don't match. Please try again</span>
+			</div>
+
+
+		<p>
 			<label for="pp-referrer_block">Block No-Referrer Requests</label>
-			<input name="<?php echo esc_attr( self::$settings_key.'[referrer_block]' ) ?>" type="checkbox" id="pp-referrer_block" value="on" <?php checked( 'on', $settings['referrer_block'] ); ?> />
-			<span class="description">When this is checked direct requests to your login page will be blocked.  This will prevent most bot net brute force attacks from ever hitting your login page </span>
+			<input name="<?php echo esc_attr( self::$settings_key.'[referrer_block]' ) ?>" type="checkbox" id="pp-referrer_block" value="on" <?php checked( 'on', $settings['referrer_block'] ); ?> /><br/>
+			<span class="description">When this is checked direct requests to your login page will be blocked.<br/>
+			The only way to reach the login page will be via redirect through /wp-admin</span>
+			<input type="hidden" id="pp-version" name="<?php echo esc_attr( self::$settings_key.'[plugin_version]' ) ?>" value="<?php echo esc_attr( self::$plugin_version ) ?>" />
+			<input type="hidden" id="pp-password" name="<?php echo esc_attr( self::$settings_key.'[password]' ) ?>" value=""/>
 		</p>
 		<?php
 		submit_button( 'Save Changes', 'primary' );
@@ -198,7 +211,7 @@ class WPized_Password_Protect {
 			<div class="inner-wrap">
 				<div id="icon-options-general" class="icon32"><br></div>
 					<h2><?php echo esc_html( self::$password_page_name )  ?></h2>
-					<form method="post" action="options.php">
+					<form method="post" id="password-protection" action="options.php">
 						<h3>Password Protection adds an additional layer of security to your login page and WordPress Admin.</h3>
 						<p> Once you set a Username and Password you will be required
 		                    to enter it before you are allowed to access the login page or WordPress dashboard.  If you are logged in to WordPress you will bypass the additional authentication.
@@ -219,6 +232,30 @@ class WPized_Password_Protect {
 		<?php
 	}
 
+	static function settings_page_js() {
+		if ( self::$password_page_hook != get_current_screen()->id )
+			return;
+		?>
+		<script type="text/javascript">
+			if (window.location.hash == '#password') {
+				document.getElementById('pass1').focus();
+			}
+			jQuery("#password-protection").submit(function () {
+				var pass1 = jQuery("#pass1"),
+			        pass2 = jQuery("#pass2");
+
+				if (pass1.val() === pass2.val()) {
+					jQuery("input#pp-password").val(pass2.val());
+					jQuery("#password-protection").submit();
+				} else {
+					jQuery(".hidden.match").show();
+				}
+			return false;
+			});
+		</script>
+		<?php
+	}
+
 	/**
 	 * Sends the not authorized response headers and prevents non authorized
 	 *  users from attempting to login or access wp-admin
@@ -226,6 +263,12 @@ class WPized_Password_Protect {
 	static function not_authorized() {
 		header( 'HTTP/1.1 403 Not Authorized' );
 		header( 'WWW-Authenticate: Basic realm="Protected Admin"' );
+		print "You do not have permission to access this site.";
+		exit;
+	}
+
+	static function block_access() {
+		header( 'HTTP/1.1 403 Not Authorized' );
 		print "You do not have permission to access this site.";
 		exit;
 	}
@@ -253,9 +296,10 @@ class WPized_Password_Protect {
 		if ( empty( $settings ) || empty( $settings['username'] )  || empty( $settings['password'] ) )
 			return;
 
+		// Blocks direct access to wp-login.php You can only access login page via wp-admin or admin redirect
 		if ( isset( $settings['referrer_block'] ) && 'off' != $settings['referrer_block'] ) {
-			if ( $_SERVER['REMOTE_ADDR'] != $_SERVER['SERVER_ADDR'] )
-				self::not_authorized();
+			if ( $_SERVER['REQUEST_URI'] == $login_path )
+				self::block_access();
 		}
 
 		// Allows this to be overridden in other plugins or theme
@@ -278,7 +322,7 @@ class WPized_Password_Protect {
 			empty( $_SERVER['PHP_AUTH_USER'] ) ||
 			empty( $_SERVER['PHP_AUTH_PW'] ) ||
 			$_SERVER['PHP_AUTH_USER'] != $settings['username'] ||
-			!wp_check_password( $_SERVER['PHP_AUTH_PW'], $settings['password'] )
+			! wp_check_password( $_SERVER['PHP_AUTH_PW'], $settings['password'] )
 		);
 
 		if ( $is_not_authenticated )
@@ -287,4 +331,4 @@ class WPized_Password_Protect {
 }
 
 new WPized_Password_Protect();
- 
+
